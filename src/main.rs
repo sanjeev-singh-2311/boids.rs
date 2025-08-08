@@ -1,24 +1,25 @@
 use raylib::prelude::*;
+use boids::Boid;
 
-const WIDTH: i32 = 1050;
-const HEIGHT: i32 = 600;
-const FONT_SIZE: i32 = 18;
+mod boids;
+
+const WIN_WIDTH: i32 = 1050;
+const WIN_HEIGHT: i32 = 600;
 
 fn main() {
     let (mut rl, thread) = raylib::init()
-        .size(WIDTH, HEIGHT)
+        .size(WIN_WIDTH, WIN_HEIGHT)
         .title("Boids")
         .build();
 
-    let msg: &str = "This should have some boids soon.";
+    let flock: [Boid; 50] = std::array::from_fn(|_| Boid::new());
 
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
-
-        let x = (WIDTH - d.measure_text(msg, FONT_SIZE)) / 2;
-        let y = HEIGHT / 2;
-
         d.clear_background(Color::BLACK);
-        d.draw_text("This should have some boids soon.", x, y, FONT_SIZE, Color::WHITE);
+
+        for boid in &flock {
+            boid.draw(&mut d);
+        }
     }
 }
