@@ -10,17 +10,17 @@ use raylib::{
 use crate::{WIN_HEIGHT, WIN_WIDTH};
 
 #[derive(Debug, Default)]
-pub struct Boid {
+pub struct Boid<'a> {
     cur_pos: Vector2,
     velocity: Vector2,
     acceleration: Vector2,
 
-    local_flock: Vec<Boid>,
+    local_flock: Vec<&'a Boid<'a>>,
     steering_vectors: Vec<Vector2>,
 }
 
-impl Boid {
-    pub fn new() -> Boid {
+impl<'a> Boid<'a> {
+    pub fn new() -> Boid<'a> {
         let rand_pos = Vector2::new(
             random_range(0.0..=WIN_WIDTH),
             random_range(0.0..=WIN_HEIGHT),
