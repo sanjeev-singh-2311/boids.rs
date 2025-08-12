@@ -3,12 +3,12 @@ use boids::Boid;
 
 mod boids;
 
-const WIN_WIDTH: i32 = 1050;
-const WIN_HEIGHT: i32 = 600;
+const WIN_WIDTH: f32 = 1050.0;
+const WIN_HEIGHT: f32 = 600.0;
 
 fn main() {
     let (mut rl, thread) = raylib::init()
-        .size(WIN_WIDTH, WIN_HEIGHT)
+        .size(WIN_WIDTH as i32, WIN_HEIGHT as i32)
         .title("Boids")
         .build();
 

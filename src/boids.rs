@@ -22,8 +22,8 @@ pub struct Boid {
 impl Boid {
     pub fn new() -> Boid {
         let rand_pos = Vector2::new(
-            random_range(0.0..=WIN_WIDTH as f32),
-            random_range(0.0..=WIN_HEIGHT as f32),
+            random_range(0.0..=WIN_WIDTH),
+            random_range(0.0..=WIN_HEIGHT),
         );
 
         let rand_angle = random_range(0.0..=TAU);
