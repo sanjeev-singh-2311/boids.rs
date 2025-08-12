@@ -1,4 +1,4 @@
-use std::f32::consts::TAU;
+use std::f32::consts::{FRAC_PI_2, TAU};
 
 use rand::random_range;
 use raylib::{
@@ -62,11 +62,26 @@ impl Boid {
         }
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle) {
-        d.draw_circle_v(
-            self.cur_pos,
-            2.0,
-            Color::WHITE,
+    pub fn draw(&self, d: &mut RaylibDrawHandle, offset: f32, color: Color) {
+        let angle = self.velocity.y.atan2(self.velocity.x) + FRAC_PI_2;
+        let half_size = offset / 2.0;
+
+        let mut relative_vertices = [
+            Vector2 { x: 0.0, y: -offset },
+            Vector2 { x: -half_size, y: half_size, },
+            Vector2 { x: half_size, y: half_size, },
+        ];
+
+        for v in &mut relative_vertices {
+            let rotated_v = Vector2::rotated(v, angle);
+            *v = self.cur_pos + rotated_v;
+        }
+
+        d.draw_triangle(
+            relative_vertices[0],
+            relative_vertices[1],
+            relative_vertices[2],
+            color,
         );
     }
 }

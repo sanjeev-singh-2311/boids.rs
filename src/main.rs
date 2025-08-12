@@ -25,7 +25,7 @@ fn main() {
         d.clear_background(Color::BLACK);
 
         for boid in &flock {
-            boid.draw(&mut d);
+            boid.draw(&mut d, 5.0, Color::WHITE);
         }
     }
 }
