@@ -5,6 +5,7 @@ mod boids;
 
 const WIN_WIDTH: f32 = 1050.0;
 const WIN_HEIGHT: f32 = 600.0;
+const FLOCK_SIZE: usize = 100;
 
 fn main() {
     let (mut rl, thread) = raylib::init()
@@ -12,7 +13,7 @@ fn main() {
         .title("Boids")
         .build();
 
-    let mut flock: [Boid; 50] = std::array::from_fn(|_| Boid::new());
+    let mut flock: [Boid; FLOCK_SIZE] = std::array::from_fn(|_| Boid::new());
 
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
