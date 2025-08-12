@@ -1,4 +1,4 @@
-use std::{f32::consts::TAU, ops::Add};
+use std::f32::consts::TAU;
 
 use rand::random_range;
 use raylib::{
@@ -41,6 +41,25 @@ impl Boid {
     pub fn update(&mut self) {
         self.velocity += self.acceleration;
         self.cur_pos += self.velocity;
+
+        self.wrap(10.0);
+    }
+
+    pub fn wrap(&mut self, padding: f32) {
+        let padded_height = WIN_HEIGHT + padding;
+        let padded_width = WIN_WIDTH + padding;
+
+        if self.cur_pos.x > padded_width {
+            self.cur_pos.x -= padded_width;
+        } else if self.cur_pos.x < 0.0 - padding {
+            self.cur_pos.x += padded_width;
+        }
+
+        if self.cur_pos.y > padded_height {
+            self.cur_pos.y -= padded_height;
+        } else if self.cur_pos.y < 0.0 - padding {
+            self.cur_pos.y += padded_height;
+        }
     }
 
     pub fn draw(&self, d: &mut RaylibDrawHandle) {
