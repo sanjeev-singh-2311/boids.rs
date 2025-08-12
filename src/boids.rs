@@ -45,23 +45,6 @@ impl Boid {
         self.wrap(10.0);
     }
 
-    pub fn wrap(&mut self, padding: f32) {
-        let padded_height = WIN_HEIGHT + padding;
-        let padded_width = WIN_WIDTH + padding;
-
-        if self.cur_pos.x > padded_width {
-            self.cur_pos.x -= padded_width;
-        } else if self.cur_pos.x < 0.0 - padding {
-            self.cur_pos.x += padded_width;
-        }
-
-        if self.cur_pos.y > padded_height {
-            self.cur_pos.y -= padded_height;
-        } else if self.cur_pos.y < 0.0 - padding {
-            self.cur_pos.y += padded_height;
-        }
-    }
-
     pub fn draw(&self, d: &mut RaylibDrawHandle, offset: f32, color: Color) {
         let angle = self.velocity.y.atan2(self.velocity.x) + FRAC_PI_2;
         let half_size = offset / 2.0;
@@ -83,5 +66,22 @@ impl Boid {
             relative_vertices[2],
             color,
         );
+    }
+
+    fn wrap(&mut self, padding: f32) {
+        let padded_height = WIN_HEIGHT + padding;
+        let padded_width = WIN_WIDTH + padding;
+
+        if self.cur_pos.x > padded_width {
+            self.cur_pos.x -= padded_width;
+        } else if self.cur_pos.x < 0.0 - padding {
+            self.cur_pos.x += padded_width;
+        }
+
+        if self.cur_pos.y > padded_height {
+            self.cur_pos.y -= padded_height;
+        } else if self.cur_pos.y < 0.0 - padding {
+            self.cur_pos.y += padded_height;
+        }
     }
 }
