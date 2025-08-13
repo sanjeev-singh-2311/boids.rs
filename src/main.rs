@@ -12,18 +12,19 @@ fn main() {
         .title("Boids")
         .build();
 
-    let mut flock: [Boid; FLOCK_SIZE] = std::array::from_fn(|_| Boid::new());
+    let mut global_flock: VecDeque<Boid> = (0..FLOCK_SIZE).map(|_| Boid::new()).collect();
 
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
 
-        for boid in &mut flock {
-            boid.update();
-        }
-
         d.clear_background(Color::BLACK);
 
-        for boid in &flock {
+        while let Some(mut boid) = global_flock.pop_front() {
+            boid.update(&global_flock);
+            global_flock.push_back(boid);
+        }
+
+        for boid in &global_flock {
             boid.draw(&mut d, 5.0, Color::WHITE);
         }
     }
