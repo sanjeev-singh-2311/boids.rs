@@ -38,7 +38,8 @@ impl<'a> Boid<'a> {
         }
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, flock: &'a VecDeque<Boid>) {
+        self.find_local_flock(flock);
         self.velocity += self.acceleration;
         self.cur_pos += self.velocity;
 
@@ -82,6 +83,29 @@ impl<'a> Boid<'a> {
             self.cur_pos.y -= padded_height;
         } else if self.cur_pos.y < 0.0 - padding {
             self.cur_pos.y += padded_height;
+        }
+    }
+
+    fn find_local_flock(&mut self, flock: &'a VecDeque<Boid<'a>>) {
+        // Remove all references before re-calculating local flock
+        self.local_flock.clear();
+
+        for boid in flock.iter() {
+            if std::ptr::eq(boid, self) {
+                continue;
+            }
+
+            if self.cur_pos.distance_to(boid.cur_pos) > PERCEPTION_RADIUS {
+                continue;
+            }
+
+            let angle_to_other_boid = self.velocity.angle_to(boid.velocity);
+            let is_visible = angle_to_other_boid < BLIND_SPOT.to_radians()
+                || angle_to_other_boid > (360.0 - BLIND_SPOT).to_radians();
+
+            if is_visible {
+                self.local_flock.push(boid);
+            }
         }
     }
 }
