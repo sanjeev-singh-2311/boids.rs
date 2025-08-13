@@ -1,11 +1,10 @@
-use raylib::prelude::*;
+use std::collections::VecDeque;
+
 use boids::Boid;
+use boids::{FLOCK_SIZE, WIN_HEIGHT, WIN_WIDTH};
+use raylib::prelude::*;
 
 mod boids;
-
-const WIN_WIDTH: f32 = 1050.0;
-const WIN_HEIGHT: f32 = 600.0;
-const FLOCK_SIZE: usize = 100;
 
 fn main() {
     let (mut rl, thread) = raylib::init()

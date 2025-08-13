@@ -1,15 +1,23 @@
+use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, TAU};
 
 use rand::random_range;
+use raylib::prelude::*;
 use raylib::{
     color::Color,
     math::Vector2,
-    prelude::{RaylibDraw, RaylibDrawHandle},
 };
 
-use crate::{WIN_HEIGHT, WIN_WIDTH};
+pub const WIN_WIDTH: f32 = 1050.0;
+pub const WIN_HEIGHT: f32 = 600.0;
+pub const FLOCK_SIZE: usize = 100;
 
-#[derive(Debug, Default)]
+const PERCEPTION_RADIUS: f32 = 30.0;
+const BLIND_SPOT: f32 = 60.0;
+const VELOCITY_LIMIT: f32 = 3.0;
+const DAMPING_FACTOR: f32 = 0.1;
+
+#[derive(Debug, Default, Clone)]
 pub struct Boid<'a> {
     cur_pos: Vector2,
     velocity: Vector2,
@@ -29,7 +37,7 @@ impl<'a> Boid<'a> {
         let rand_angle = random_range(0.0..=TAU);
         let direction_vec = Vector2::new(rand_angle.cos(), rand_angle.sin());
 
-        let speed = random_range(0.0..=5.0);
+        let speed = random_range(0.0..=VELOCITY_LIMIT);
 
         Boid {
             cur_pos: rand_pos,
