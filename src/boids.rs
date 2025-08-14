@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, TAU};
 
 use std::rc::Rc;
@@ -59,7 +58,7 @@ impl Boid {
         })
     }
 
-    pub fn update(&mut self, flock: &Vec<BoidRef>) {
+    pub fn update(&mut self, flock: &[BoidRef]) {
         self.find_local_flock(flock);
         self.velocity += self.acceleration;
         self.cur_pos += self.velocity;
@@ -107,7 +106,7 @@ impl Boid {
         }
     }
 
-    fn find_local_flock(&mut self, flock: &Vec<BoidRef>) {
+    fn find_local_flock(&mut self, flock: &[BoidRef]) {
         // remove all references before re-calculating local flock
         self.local_flock.clear();
 

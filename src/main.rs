@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 
 use boids::{Boid, BoidRef};
 use boids::{FLOCK_SIZE, WIN_HEIGHT, WIN_WIDTH};
