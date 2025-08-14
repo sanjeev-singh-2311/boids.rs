@@ -7,14 +7,7 @@ use rand::random_range;
 use raylib::prelude::*;
 use raylib::{color::Color, math::Vector2};
 
-pub const WIN_WIDTH: f32 = 1050.0;
-pub const WIN_HEIGHT: f32 = 600.0;
-pub const FLOCK_SIZE: usize = 100;
-
-const PERCEPTION_RADIUS: f32 = 30.0;
-const BLIND_SPOT: f32 = 60.0;
-const VELOCITY_LIMIT: f32 = 3.0;
-const DAMPING_FACTOR: f32 = 0.1;
+use crate::config::{BLIND_SPOT, PERCEPTION_RADIUS, VELOCITY_LIMIT, WIN_HEIGHT, WIN_WIDTH};
 
 pub type BoidRef = Rc<RefCell<Boid>>;
 
@@ -61,8 +54,14 @@ impl Boid {
 
         let mut relative_vertices = [
             Vector2 { x: 0.0, y: -offset },
-            Vector2 { x: -half_size, y: half_size, },
-            Vector2 { x: half_size, y: half_size, },
+            Vector2 {
+                x: -half_size,
+                y: half_size,
+            },
+            Vector2 {
+                x: half_size,
+                y: half_size,
+            },
         ];
 
         for v in &mut relative_vertices {
