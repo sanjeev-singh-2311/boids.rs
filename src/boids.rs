@@ -21,7 +21,6 @@ pub struct Boid {
     acceleration: Vector2,
 
     local_flock: Vec<BoidRef>,
-    steering_vectors: Vec<Vector2>,
 }
 
 impl Boid {
@@ -45,6 +44,21 @@ impl Boid {
 
     pub fn update(&mut self, flock: &[BoidRef]) {
         self.find_local_flock(flock);
+        let mut steering_vectors: Vec<Vector2> = Vec::new();
+
+        if let Some(vec) = self.get_align_vector() {
+            steering_vectors.push(vec);
+        }
+
+        let mut sum_steering_vec = Vector2::zero();
+        if !steering_vectors.is_empty() {
+            for &vec in &steering_vectors {
+                sum_steering_vec += vec;
+            }
+
+            self.acceleration = sum_steering_vec.scale_by(1.0 / steering_vectors.len() as f32);
+        }
+
         self.velocity += self.acceleration;
 
         let speed = self.velocity.length();
@@ -56,6 +70,9 @@ impl Boid {
 
         self.cur_pos += self.velocity;
         self.wrap(10.0);
+
+        // Acceleration is only applied for one frame, thus we clear it
+        self.acceleration = Vector2::zero();
     }
 
     pub fn draw(&self, d: &mut RaylibDrawHandle, offset: f32, color: Color) {
@@ -85,6 +102,29 @@ impl Boid {
             relative_vertices[2],
             color,
         );
+    }
+
+    fn get_align_vector(&mut self) -> Option<Vector2> {
+        let avg_velocity = self.get_avg_velocity();
+        if avg_velocity.length() == 0.0 {
+            return None;
+        }
+
+        Some(avg_velocity - self.velocity)
+    }
+
+    fn get_avg_velocity(&self) -> Vector2 {
+        let mut avg_postition = Vector2::zero();
+
+        if self.local_flock.is_empty() {
+            return avg_postition;
+        }
+
+        for boid in &self.local_flock {
+            avg_postition += boid.borrow().velocity;
+        }
+
+        avg_postition.scale_by(1.0 / self.local_flock.len() as f32)
     }
 
     fn wrap(&mut self, padding: f32) {
