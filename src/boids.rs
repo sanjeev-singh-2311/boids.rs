@@ -7,7 +7,10 @@ use rand::random_range;
 use raylib::prelude::*;
 use raylib::{color::Color, math::Vector2};
 
-use crate::config::{BLIND_SPOT, PERCEPTION_RADIUS, VELOCITY_LIMIT, WIN_HEIGHT, WIN_WIDTH};
+use crate::config::{
+    BLIND_SPOT, DAMPING_FACTOR, PERCEPTION_RADIUS, VELOCITY_LIMIT, WIN_HEIGHT, WIN_WIDTH,
+};
+use crate::utils::move_vec_towards;
 
 pub type BoidRef = Rc<RefCell<Boid>>;
 
@@ -43,8 +46,15 @@ impl Boid {
     pub fn update(&mut self, flock: &[BoidRef]) {
         self.find_local_flock(flock);
         self.velocity += self.acceleration;
-        self.cur_pos += self.velocity;
 
+        let speed = self.velocity.length();
+        if speed > VELOCITY_LIMIT {
+            let target = self.velocity.normalized().scale_by(VELOCITY_LIMIT);
+            let step = (speed - VELOCITY_LIMIT) * DAMPING_FACTOR;
+            self.velocity = move_vec_towards(self.velocity, target, step);
+        }
+
+        self.cur_pos += self.velocity;
         self.wrap(10.0);
     }
 

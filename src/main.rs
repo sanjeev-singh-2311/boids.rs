@@ -1,10 +1,11 @@
-use crate::config::{FLOCK_SIZE, WIN_HEIGHT, WIN_WIDTH};
-
 use boids::{Boid, BoidRef};
 use raylib::prelude::*;
 
+use crate::config::{FLOCK_SIZE, WIN_HEIGHT, WIN_WIDTH};
+
 mod boids;
 mod config;
+mod utils;
 
 fn main() {
     let (mut rl, thread) = raylib::init()
