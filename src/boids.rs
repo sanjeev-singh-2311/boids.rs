@@ -16,12 +16,6 @@ const BLIND_SPOT: f32 = 60.0;
 const VELOCITY_LIMIT: f32 = 3.0;
 const DAMPING_FACTOR: f32 = 0.1;
 
-macro_rules! wrap_boids {
-    ($x:expr) => {
-        Rc::new(RefCell::new($x))
-    };
-}
-
 pub type BoidRef = Rc<RefCell<Boid>>;
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -46,11 +40,11 @@ impl Boid {
 
         let speed = random_range(0.0..=VELOCITY_LIMIT);
 
-        wrap_boids!(Boid {
+        Rc::new(RefCell::new(Boid {
             cur_pos: rand_pos,
             velocity: direction_vec.scale_by(speed),
             ..Default::default()
-        })
+        }))
     }
 
     pub fn update(&mut self, flock: &[BoidRef]) {
