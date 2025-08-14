@@ -152,15 +152,11 @@ impl Boid {
             return false;
         }
 
-        let angle_to_other_boid = self.velocity.angle_to(boid.velocity);
-        let outside_blind_spot = angle_to_other_boid < BLIND_SPOT.to_radians()
-            || angle_to_other_boid > (360.0 - BLIND_SPOT).to_radians();
-        if outside_blind_spot {
-            return true;
-        }
+        let angle_to_other_boid = self.velocity.angle_to(boid.cur_pos - self.cur_pos);
 
-        false
-
+        // Check if boid is outside blind spot
+        angle_to_other_boid < BLIND_SPOT.to_radians()
+            || angle_to_other_boid > (360.0 - BLIND_SPOT).to_radians()
     }
 
     fn find_local_flock(&mut self, flock: &[BoidRef]) {
