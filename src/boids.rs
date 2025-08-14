@@ -10,7 +10,7 @@ use raylib::{color::Color, math::Vector2};
 use crate::config::{
     BLIND_SPOT, DAMPING_FACTOR, PERCEPTION_RADIUS, VELOCITY_LIMIT, WIN_HEIGHT, WIN_WIDTH,
 };
-use crate::utils::move_vec_towards;
+use crate::utils::{get_random_color, move_vec_towards};
 
 pub type BoidRef = Rc<RefCell<Boid>>;
 
@@ -21,6 +21,8 @@ pub struct Boid {
     acceleration: Vector2,
 
     local_flock: Vec<BoidRef>,
+
+    color: Color
 }
 
 impl Boid {
@@ -38,6 +40,7 @@ impl Boid {
         Rc::new(RefCell::new(Boid {
             cur_pos: rand_pos,
             velocity: direction_vec.scale_by(speed),
+            color: get_random_color(),
             ..Default::default()
         }))
     }
@@ -75,7 +78,7 @@ impl Boid {
         self.acceleration = Vector2::zero();
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, offset: f32, color: Color) {
+    pub fn draw(&self, d: &mut RaylibDrawHandle, offset: f32) {
         let angle = self.velocity.y.atan2(self.velocity.x) + FRAC_PI_2;
         let half_size = offset / 2.0;
 
@@ -100,7 +103,7 @@ impl Boid {
             relative_vertices[0],
             relative_vertices[1],
             relative_vertices[2],
-            color,
+            self.color,
         );
     }
 

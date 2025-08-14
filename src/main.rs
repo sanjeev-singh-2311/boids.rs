@@ -25,7 +25,7 @@ fn main() {
         }
 
         for boid in &global_flock {
-            boid.borrow_mut().draw(&mut d, 5.0, Color::WHITE);
+            boid.borrow_mut().draw(&mut d, 5.0);
         }
     }
 }
