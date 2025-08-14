@@ -1,5 +1,5 @@
 use boids::{Boid, BoidRef};
-use config::BOID_SIZE;
+use config::{BACKGROUND_COLOR, BOID_SIZE};
 use raylib::prelude::*;
 
 use crate::config::{FLOCK_SIZE, WIN_HEIGHT, WIN_WIDTH};
@@ -21,7 +21,7 @@ fn main() {
     while !rl.window_should_close() {
         let mut d = rl.begin_drawing(&thread);
 
-        d.clear_background(Color::BLACK);
+        d.clear_background(BACKGROUND_COLOR);
 
         for boid in &global_flock {
             boid.borrow_mut().update(&global_flock);
