@@ -147,23 +147,31 @@ impl Boid {
         }
     }
 
+    fn is_visible(&self, boid: &Boid) -> bool {
+        if self.cur_pos.distance_to(boid.cur_pos) > PERCEPTION_RADIUS {
+            return false;
+        }
+
+        let angle_to_other_boid = self.velocity.angle_to(boid.velocity);
+        let outside_blind_spot = angle_to_other_boid < BLIND_SPOT.to_radians()
+            || angle_to_other_boid > (360.0 - BLIND_SPOT).to_radians();
+        if outside_blind_spot {
+            return true;
+        }
+
+        false
+
+    }
+
     fn find_local_flock(&mut self, flock: &[BoidRef]) {
         // remove all references before re-calculating local flock
         self.local_flock.clear();
 
         for boid in flock {
-            if let Ok(k) = boid.try_borrow_mut() {
+            if let Ok(b) = boid.try_borrow_mut() {
                 // No check need for self-reference as if it's the same boid, we
                 // get Err since it has already been borrowed in the main loop
-                if self.cur_pos.distance_to(k.cur_pos) > PERCEPTION_RADIUS {
-                    continue;
-                }
-
-                let angle_to_other_boid = self.velocity.angle_to(k.velocity);
-                let is_visible = angle_to_other_boid < BLIND_SPOT.to_radians()
-                    || angle_to_other_boid > (360.0 - BLIND_SPOT).to_radians();
-
-                if is_visible {
+                if self.is_visible(&b) {
                     self.local_flock.push(Rc::clone(boid));
                 }
             }
