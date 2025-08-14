@@ -14,6 +14,8 @@ fn main() {
         .title("Boids")
         .build();
 
+    rl.set_target_fps(60);
+
     let global_flock: Vec<BoidRef> = (0..FLOCK_SIZE).map(|_| Boid::new()).collect();
 
     while !rl.window_should_close() {
