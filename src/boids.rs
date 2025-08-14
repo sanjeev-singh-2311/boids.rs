@@ -1,14 +1,11 @@
 use std::f32::consts::{FRAC_PI_2, TAU};
 
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use rand::random_range;
 use raylib::prelude::*;
-use raylib::{
-    color::Color,
-    math::Vector2,
-};
+use raylib::{color::Color, math::Vector2};
 
 pub const WIN_WIDTH: f32 = 1050.0;
 pub const WIN_HEIGHT: f32 = 600.0;
@@ -18,14 +15,6 @@ const PERCEPTION_RADIUS: f32 = 30.0;
 const BLIND_SPOT: f32 = 60.0;
 const VELOCITY_LIMIT: f32 = 3.0;
 const DAMPING_FACTOR: f32 = 0.1;
-
-macro_rules! wrap_boids {
-    ($x:expr) => {
-        Rc::new(RefCell::new(
-                $x
-        ))
-    };
-}
 
 pub type BoidRef = Rc<RefCell<Boid>>;
 
@@ -51,11 +40,11 @@ impl Boid {
 
         let speed = random_range(0.0..=VELOCITY_LIMIT);
 
-        wrap_boids!(Boid {
+        Rc::new(RefCell::new(Boid {
             cur_pos: rand_pos,
             velocity: direction_vec.scale_by(speed),
             ..Default::default()
-        })
+        }))
     }
 
     pub fn update(&mut self, flock: &[BoidRef]) {
@@ -110,15 +99,10 @@ impl Boid {
         // remove all references before re-calculating local flock
         self.local_flock.clear();
 
-        for boid in flock.iter() {
-            if let Ok(k) = boid.try_borrow_mut()  {
-                // try_borrow_mut fails when self and k are the same i guess, since the program
-                // never enters this condition
-
-                // if *k == *self {
-                //     continue;
-                // }
-
+        for boid in flock {
+            if let Ok(k) = boid.try_borrow_mut() {
+                // No check need for self-reference as if it's the same boid, we
+                // get Err since it has already been borrowed in the main loop
                 if self.cur_pos.distance_to(k.cur_pos) > PERCEPTION_RADIUS {
                     continue;
                 }
@@ -131,10 +115,6 @@ impl Boid {
                     self.local_flock.push(Rc::clone(boid));
                 }
             }
-            else {
-                continue;
-            }
-
         }
     }
 }
