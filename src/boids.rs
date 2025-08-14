@@ -53,6 +53,10 @@ impl Boid {
             steering_vectors.push(vec);
         }
 
+        if let Some(vec) = self.get_cohesion_vector() {
+            steering_vectors.push(vec);
+        }
+
         let mut sum_steering_vec = Vector2::zero();
         if !steering_vectors.is_empty() {
             for &vec in &steering_vectors {
@@ -116,6 +120,33 @@ impl Boid {
         Some(avg_velocity - self.velocity)
     }
 
+    fn get_cohesion_vector(&mut self) -> Option<Vector2> {
+        let avg_position = self.get_avg_position();
+        if avg_position.length() == 0.0 {
+            return None;
+        }
+
+        let steering_vec = avg_position - self.cur_pos;
+		// Prevent cohesion from overwhelming other vectors
+        steering_vec.clamp(0.0..VELOCITY_LIMIT/1.5);
+
+        Some(steering_vec)
+    }
+
+    fn get_avg_position(&self) -> Vector2 {
+        let mut avg_postition = Vector2::zero();
+
+        if self.local_flock.is_empty() {
+            return avg_postition;
+        }
+
+        for boid in &self.local_flock {
+            avg_postition += boid.borrow().cur_pos;
+        }
+
+        avg_postition.scale_by(1.0/self.local_flock.len() as f32)
+    }
+
     fn get_avg_velocity(&self) -> Vector2 {
         let mut avg_postition = Vector2::zero();
 
@@ -164,7 +195,7 @@ impl Boid {
         self.local_flock.clear();
 
         for boid in flock {
-            if let Ok(b) = boid.try_borrow_mut() {
+            if let Ok(b) = boid.try_borrow() {
                 // No check need for self-reference as if it's the same boid, we
                 // get Err since it has already been borrowed in the main loop
                 if self.is_visible(&b) {
