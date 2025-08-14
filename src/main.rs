@@ -12,6 +12,8 @@ fn main() {
     let (mut rl, thread) = raylib::init()
         .size(WIN_WIDTH as i32, WIN_HEIGHT as i32)
         .title("Boids")
+        .transparent()
+        .undecorated()
         .build();
 
     rl.set_target_fps(60);
