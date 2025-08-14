@@ -17,7 +17,9 @@ pub type BoidRef = Rc<RefCell<Boid>>;
 
 #[derive(Debug, Default)]
 pub struct Boid {
+    #[allow(dead_code)]
     id: usize,
+
     cur_pos: Vector2,
     velocity: Vector2,
     acceleration: Vector2,
@@ -47,7 +49,7 @@ impl Boid {
         let rand_angle = random_range(0.0..=TAU);
         let direction_vec = Vector2::new(rand_angle.cos(), rand_angle.sin());
 
-        let speed = random_range(0.0..=VELOCITY_LIMIT);
+        let speed = random_range(MIN_VELOCITY..=VELOCITY_LIMIT);
 
         Rc::new(RefCell::new(Boid {
             id,
@@ -143,7 +145,9 @@ impl Boid {
 
         let mut steering_vec = avg_position - self.cur_pos;
         // Prevent cohesion from overwhelming other vectors
-        steering_vec = steering_vec.clamp(MIN_VELOCITY..(VELOCITY_LIMIT / 3.0));
+        steering_vec = clamp_vector_magnitude(
+            steering_vec, MIN_VELOCITY..(VELOCITY_LIMIT / 3.0)
+        );
 
         Some(steering_vec)
     }
@@ -157,10 +161,8 @@ impl Boid {
             let dist = direction_away.length();
 
             if dist > 0.0 {
-                let scale = 3.0 / dist.powf(2.0);
-                let vec = direction_away
-                    .normalized()
-                    .scale_by(scale);
+                let scale = 50.0 / dist;
+                let vec = direction_away.normalized().scale_by(scale);
                 steering_vecs.push(vec);
             }
         }
@@ -179,7 +181,7 @@ impl Boid {
             avg_postition += boid.borrow().cur_pos;
         }
 
-        avg_postition.scale_by(1.0/self.local_flock.len() as f32)
+        avg_postition.scale_by(1.0 / self.local_flock.len() as f32)
     }
 
     fn get_avg_velocity(&self) -> Vector2 {
