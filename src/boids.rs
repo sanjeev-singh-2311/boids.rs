@@ -11,7 +11,7 @@ use crate::config::{BLIND_SPOT, PERCEPTION_RADIUS, VELOCITY_LIMIT, WIN_HEIGHT, W
 
 pub type BoidRef = Rc<RefCell<Boid>>;
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default)]
 pub struct Boid {
     cur_pos: Vector2,
     velocity: Vector2,
