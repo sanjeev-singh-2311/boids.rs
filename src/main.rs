@@ -1,4 +1,5 @@
 use boids::{Boid, BoidRef};
+use config::BOID_SIZE;
 use raylib::prelude::*;
 
 use crate::config::{FLOCK_SIZE, WIN_HEIGHT, WIN_WIDTH};
@@ -25,7 +26,7 @@ fn main() {
         }
 
         for boid in &global_flock {
-            boid.borrow_mut().draw(&mut d, 5.0);
+            boid.borrow_mut().draw(&mut d, BOID_SIZE);
         }
     }
 }
