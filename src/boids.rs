@@ -1,5 +1,7 @@
-use std::collections::VecDeque;
 use std::f32::consts::{FRAC_PI_2, TAU};
+
+use std::rc::Rc;
+use std::cell::RefCell;
 
 use rand::random_range;
 use raylib::prelude::*;
@@ -17,18 +19,28 @@ const BLIND_SPOT: f32 = 60.0;
 const VELOCITY_LIMIT: f32 = 3.0;
 const DAMPING_FACTOR: f32 = 0.1;
 
-#[derive(Debug, Default, Clone)]
-pub struct Boid<'a> {
+macro_rules! wrap_boids {
+    ($x:expr) => {
+        Rc::new(RefCell::new(
+                $x
+        ))
+    };
+}
+
+pub type BoidRef = Rc<RefCell<Boid>>;
+
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct Boid {
     cur_pos: Vector2,
     velocity: Vector2,
     acceleration: Vector2,
 
-    local_flock: Vec<&'a Boid<'a>>,
+    local_flock: Vec<BoidRef>,
     steering_vectors: Vec<Vector2>,
 }
 
-impl<'a> Boid<'a> {
-    pub fn new() -> Boid<'a> {
+impl Boid {
+    pub fn new() -> BoidRef {
         let rand_pos = Vector2::new(
             random_range(0.0..=WIN_WIDTH),
             random_range(0.0..=WIN_HEIGHT),
@@ -39,14 +51,14 @@ impl<'a> Boid<'a> {
 
         let speed = random_range(0.0..=VELOCITY_LIMIT);
 
-        Boid {
+        wrap_boids!(Boid {
             cur_pos: rand_pos,
             velocity: direction_vec.scale_by(speed),
             ..Default::default()
-        }
+        })
     }
 
-    pub fn update(&mut self, flock: &'a VecDeque<Boid>) {
+    pub fn update(&mut self, flock: &[BoidRef]) {
         self.find_local_flock(flock);
         self.velocity += self.acceleration;
         self.cur_pos += self.velocity;
@@ -94,26 +106,35 @@ impl<'a> Boid<'a> {
         }
     }
 
-    fn find_local_flock(&mut self, flock: &'a VecDeque<Boid<'a>>) {
-        // Remove all references before re-calculating local flock
+    fn find_local_flock(&mut self, flock: &[BoidRef]) {
+        // remove all references before re-calculating local flock
         self.local_flock.clear();
 
         for boid in flock.iter() {
-            if std::ptr::eq(boid, self) {
+            if let Ok(k) = boid.try_borrow_mut()  {
+                // try_borrow_mut fails when self and k are the same i guess, since the program
+                // never enters this condition
+
+                // if *k == *self {
+                //     continue;
+                // }
+
+                if self.cur_pos.distance_to(k.cur_pos) > PERCEPTION_RADIUS {
+                    continue;
+                }
+
+                let angle_to_other_boid = self.velocity.angle_to(k.velocity);
+                let is_visible = angle_to_other_boid < BLIND_SPOT.to_radians()
+                    || angle_to_other_boid > (360.0 - BLIND_SPOT).to_radians();
+
+                if is_visible {
+                    self.local_flock.push(Rc::clone(boid));
+                }
+            }
+            else {
                 continue;
             }
 
-            if self.cur_pos.distance_to(boid.cur_pos) > PERCEPTION_RADIUS {
-                continue;
-            }
-
-            let angle_to_other_boid = self.velocity.angle_to(boid.velocity);
-            let is_visible = angle_to_other_boid < BLIND_SPOT.to_radians()
-                || angle_to_other_boid > (360.0 - BLIND_SPOT).to_radians();
-
-            if is_visible {
-                self.local_flock.push(boid);
-            }
         }
     }
 }
