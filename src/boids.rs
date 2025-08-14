@@ -1,6 +1,6 @@
 use std::f32::consts::{FRAC_PI_2, TAU};
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use rand::random_range;
@@ -8,25 +8,37 @@ use raylib::prelude::*;
 use raylib::{color::Color, math::Vector2};
 
 use crate::config::{
-    BLIND_SPOT, DAMPING_FACTOR, PERCEPTION_RADIUS, VELOCITY_LIMIT, WIN_HEIGHT, WIN_WIDTH,
+    BLIND_SPOT, DAMPING_FACTOR, MIN_VELOCITY, PERCEPTION_RADIUS, VELOCITY_LIMIT, WIN_HEIGHT,
+    WIN_WIDTH,
 };
-use crate::utils::{get_random_color, move_vec_towards};
+use crate::utils::{clamp_vector_magnitude, get_random_color, move_vec_towards};
 
 pub type BoidRef = Rc<RefCell<Boid>>;
 
 #[derive(Debug, Default)]
 pub struct Boid {
+    id: usize,
     cur_pos: Vector2,
     velocity: Vector2,
     acceleration: Vector2,
 
     local_flock: Vec<BoidRef>,
 
-    color: Color
+    color: Color,
+}
+
+thread_local! {
+    static NEXT_ID: Cell<usize> = const { Cell::new(0) };
 }
 
 impl Boid {
     pub fn new() -> BoidRef {
+        let id = NEXT_ID.with(|c| {
+            let v = c.get();
+            c.set(v + 1);
+            v
+        });
+
         let rand_pos = Vector2::new(
             random_range(0.0..=WIN_WIDTH),
             random_range(0.0..=WIN_HEIGHT),
@@ -38,6 +50,7 @@ impl Boid {
         let speed = random_range(0.0..=VELOCITY_LIMIT);
 
         Rc::new(RefCell::new(Boid {
+            id,
             cur_pos: rand_pos,
             velocity: direction_vec.scale_by(speed),
             color: get_random_color(),
