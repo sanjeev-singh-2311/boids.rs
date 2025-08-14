@@ -57,6 +57,8 @@ impl Boid {
             steering_vectors.push(vec);
         }
 
+        steering_vectors.append(&mut self.get_separation_vectors());
+
         let mut sum_steering_vec = Vector2::zero();
         if !steering_vectors.is_empty() {
             for &vec in &steering_vectors {
@@ -126,11 +128,31 @@ impl Boid {
             return None;
         }
 
-        let steering_vec = avg_position - self.cur_pos;
-		// Prevent cohesion from overwhelming other vectors
-        steering_vec.clamp(0.0..VELOCITY_LIMIT/1.5);
+        let mut steering_vec = avg_position - self.cur_pos;
+        // Prevent cohesion from overwhelming other vectors
+        steering_vec = steering_vec.clamp(MIN_VELOCITY..(VELOCITY_LIMIT / 3.0));
 
         Some(steering_vec)
+    }
+
+    fn get_separation_vectors(&self) -> Vec<Vector2> {
+        let mut steering_vecs = Vec::with_capacity(self.local_flock.len());
+
+        for boid_ref in &self.local_flock {
+            let boid = boid_ref.borrow();
+            let direction_away = self.cur_pos - boid.cur_pos;
+            let dist = direction_away.length();
+
+            if dist > 0.0 {
+                let scale = 3.0 / dist.powf(2.0);
+                let vec = direction_away
+                    .normalized()
+                    .scale_by(scale);
+                steering_vecs.push(vec);
+            }
+        }
+
+        steering_vecs
     }
 
     fn get_avg_position(&self) -> Vector2 {
